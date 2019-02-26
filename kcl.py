@@ -49,7 +49,9 @@ password = keyring.get_password(SERVICE_ID, uname)  # retrieve password4
 UNAME = uname
 PASSWD = password
 
-STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
+#STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
+STARTDATE = (datetime.utcnow().replace(
+    hour=0, minute=0, second=0, microsecond=0)).isoformat()
 ENDDATE = (datetime.utcnow() + timedelta(days=7)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
