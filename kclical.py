@@ -50,7 +50,7 @@ PASSWD = password
 # STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
 STARTDATE = (datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0)).isoformat()
-ENDDATE = (datetime.utcnow() + timedelta(days=30)).isoformat()
+ENDDATE = (datetime.utcnow() + timedelta(days=60)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
 	            <username>{}</username>
@@ -149,7 +149,8 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
                   row.get('teacherName', 'Teaching Assistant'))
         event.add('dtstart', row['start'])
         event.add('dtend', row['end'])
-        event.add('summary', row['type']+' - '+row['desc2'])
+        # event.add('summary', row['type']+' - '+row['desc2'])
+        event.add('summary', row.get('desc2', 'Description'))
         event.add('location', row['locAdd1'])
         cal.add_component(event)
 
