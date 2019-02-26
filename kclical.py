@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 '''
-Fetch Calendar from King's App
-
+Parse King's Calender to iCal format
 Version 2019-02-25.22
-
-To Do:
-Add command line args for date range, etc.
 '''
 
 import xml.etree.ElementTree as ET
@@ -18,6 +14,8 @@ import re
 import keyring
 import requests
 import crayons
+from icalendar import Calendar, Event
+
 
 # keyring namespace for this app
 SERVICE_ID = 'kcl_timetable'
@@ -52,7 +50,7 @@ PASSWD = password
 # STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
 STARTDATE = (datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0)).isoformat()
-ENDDATE = (datetime.utcnow() + timedelta(days=7)).isoformat()
+ENDDATE = (datetime.utcnow() + timedelta(days=30)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
 	            <username>{}</username>
@@ -116,11 +114,11 @@ for item in CALITEMS:
 
     date_time_str = calentry['end']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['end'] = date_time_obj.strftime("%H:%M")
+    calentry['end'] = date_time_obj
 
     date_time_str = calentry['start']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['start'] = date_time_obj.strftime("%H:%M")
+    calentry['start'] = date_time_obj
 
     date_key = date_time_obj.strftime("%Y-%m-%d")
 
@@ -139,65 +137,26 @@ for item in CALITEMS:
 
     dates.setdefault(date_key, []).append(calentry)
 
+cal = Calendar()
+
 for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
-    print()
     dt = datetime.strptime(key, '%Y-%m-%d')
-    if dt.date() == datetime.today().date():
-        date_str = dt.strftime("%a %d %b %Y") + " (Today)"
-    elif dt.date() == (datetime.today().date() + timedelta(days=1)):
-        date_str = dt.strftime("%a %d %b %Y") + " (Tomorrow)"
-    elif dt.date() == (datetime.today().date() - timedelta(days=1)):
-        date_str = dt.strftime("%a %d %b %Y") + " (Yesterday)"
-    else:
-        date_str = dt.strftime("%a %d %b %Y")
-
-    print(
-        crayons.green(date_str, bold=True)
-    )
-
     events = dates[key]
-    for event in sorted(events, key=lambda k: k['start']):
-        if dt.date() <= datetime.today().date() and event.get('start', '00:00') < datetime.utcnow().strftime("%H:%M"):
-            print('    {} - {}\t\t{}\n  ↳ {}   {}\n'.format(
-                crayons.blue(
-                    event.get('start', 'No Start Time Given'), bold=True),
-                crayons.blue(
-                    event.get('end', 'No End Time Given'), bold=True),
-                event.get('type', 'Lesson Type'),
-                '{:<25}'.format(event.get('desc2', 'Description')[:25]),
-                event.get('locAdd1', 'Location')
-            ))
-        else:
-            print('    {} - {}\t\t{}\n  ↳ {}   {}\n'.format(
-                crayons.magenta(
-                    event.get('start', 'No Start Time Given'), bold=True),
-                crayons.magenta(
-                    event.get('end', 'No End Time Given'), bold=True),
-                event.get('type', 'Lesson Type'),
-                '{:<25}'.format(event.get('desc2', 'Description')[:25]),
-                event.get('locAdd1', 'Location')
-            ))
 
-print("It is currently ", end="")
-print(
-    crayons.magenta("{}".format(
-        datetime.utcnow().strftime("%H:%M")), bold=True), end=""
-)
-print(" on ", end="")
-print(
-    crayons.green("{}".format(
-        datetime.utcnow().strftime("%a %d %b %Y")), bold=True), end=""
-)
-print('\n')
+    for row in events:
+        event = Event()
+        event.add('description', row['desc1']+' - ' +
+                  row.get('teacherName', 'Teaching Assistant'))
+        event.add('dtstart', row['start'])
+        event.add('dtend', row['end'])
+        event.add('summary', row['type']+' - '+row['desc2'])
+        event.add('location', row['locAdd1'])
+        cal.add_component(event)
+
+f = open('course_schedule.ics', 'wb')
+f.write(cal.to_ical())
+f.close()
+
+print("Exported to course_schedule.ics")
 
 sys.exit
-
-'''
-<retrieveCalendar xmlns = "http://campusm.gw.com/campusm" >
-	            <username > {} < /username >
-	            <password > {} < /password >
-	            <calType > course_timetable < /calType >
-	            <start > 2019-02-25T00: 00: 00.000+00: 00 < /start >
-	            <end > 2019-03-04T00: 00: 00.000+00: 00 < /end >
-            </retrieveCalendar>
-'''
