@@ -40,4 +40,4 @@ then add the the line
 
 ---
 
-![kcl.py timetable fetch](https://raw.githubusercontent.com/finwarman/kcl-timetable/master/screenshots/timetable_fetch_kclpy.png "kcl.py Timetable View")
+![kcl.py timetable fetch](https://raw.githubusercontent.com/finwarman/kcl-timetable/master/screenshots/timetable_fetch_kclpy.png =150 "kcl.py Timetable View")
