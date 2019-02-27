@@ -20,6 +20,8 @@ python3 /[path]/[to]/kclical.py
 Then login with your k-number and password - your password will be stored locally and securly in keyring.
 If you mistype your login, simply delete the 'knumber.fin' file in the script directory and log in again.
 
+![kclical.py calendar export](https://raw.githubusercontent.com/finwarman/kcl-timetable/master/screenshots/calendar_export.png "kclical.py Calendar Export")
+
 ---
 
 ### View timetable in terminal:  (kcl.py)
