@@ -37,3 +37,5 @@ Edit __~/.bash_profile__, with
 then add the the line
 
 > alias timetable='python3 '/[path]/[to]/kcl.py'
+
+![kcl.py timetable fetch](https://raw.githubusercontent.com/finwarman/kcl-timetable/master/screenshots/timetable_fetch_kclpy.png "kcl.py Timetable View")
