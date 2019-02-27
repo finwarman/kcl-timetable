@@ -38,7 +38,7 @@ Log in with your k-number and password - your credentials are stored locally for
 
 To add as a terminal command, add it as an alias, e.g. for macOS:
 Edit __~/.bash_profile__, with
-```sudo nano ~/.bash_profile__```
+```sudo nano ~/.bash_profile```
 
 then add the the line
 
