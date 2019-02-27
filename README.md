@@ -1,3 +1,6 @@
+# kcl-timetable (kcl.py & kclical.py)
+## Tools for viewing and exporting your KCL timetable.
+
 For Python3 - To install dependencies paste the following in your terminal:
 
 ```
@@ -8,7 +11,7 @@ pip3 install icalendar
 ```
 ---
 
-###iCalendar export:  (kclical.py)
+### iCalendar export:  (kclical.py)
 
 ```
 python3 /[path]/[to]/kclical.py
@@ -19,7 +22,7 @@ If you mistype your login, simply delete the 'knumber.fin' file in the script di
 
 ---
 
-###View timetable in terminal:  (kcl.py)
+### View timetable in terminal:  (kcl.py)
 
 ```
 python3 /[path]/[to]/kcl.py
@@ -33,4 +36,4 @@ Edit __~/.bash_profile__, with
 
 then add the the line
 
->alias timetable='python3 '/[path]/[to]/kcl.py'
+> alias timetable='python3 '/[path]/[to]/kcl.py'
