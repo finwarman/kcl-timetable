@@ -65,7 +65,7 @@ APP_REQ_HEADERS = {
     'Content-Type':	    'application/xml',
     'Accept-Encoding':	'gzip',
     'Pragma':	        'no-cache',
-    'User-Agent':	    '''Kings%20Mobile/9003776 CFNetwork/976 Darwin/18.2.0''',
+    'User-Agent':	    '''King's%20Mobile/9081458 CFNetwork/978.0.7 Darwin/18.7.0''',
     'Content-Length':	'291',
     'Accept':       	'*/*',
     'Accept-Language':	'en-gb',
@@ -88,12 +88,12 @@ APP_REQ_HEADERS = {
 XML_RESPONSE = ""
 try:
     XML_RESPONSE = requests.post(
-        'https://campusm.kcl.ac.uk//kcl_live/services/CampusMUniversityService/retrieveCalendar',
+        'https://campusm.kcl.ac.uk//kclNewTimetable/services/CampusMUniversityService/retrieveCalendar',
         data=XML_BODY, headers=APP_REQ_HEADERS, verify=True).text
 except:
     try:
         XML_RESPONSE = requests.post(
-            'https://campusm.kcl.ac.uk//kcl_live/services/CampusMUniversityService/retrieveCalendar',
+            'https://campusm.kcl.ac.uk//kclNewTimetable/services/CampusMUniversityService/retrieveCalendar',
             data=XML_BODY, headers=APP_REQ_HEADERS, verify=False).text
         print("Was unable to verify SSL Cert. Disabled 'verify=True' flag for Request")
     except:
@@ -154,10 +154,18 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
         event.add('location', row['locAdd1'])
         cal.add_component(event)
 
-f = open('course_schedule.ics', 'wb')
+desktop = os.path.expanduser("~/Desktop")
+timestamp = (datetime.now().strftime("%b%Y-%H_%M_%S")).lower()
+calendar_path = "" + desktop + "/course_schedule_" + timestamp + ".ics"
+
+f = open(calendar_path, 'wb')
 f.write(cal.to_ical())
 f.close()
 
-print("Exported to course_schedule.ics")
+print("Exported to " + calendar_path)
+
+print("Opening in calendar...")
+os.system('open ' + calendar_path)
+print("Done! Goodbye :)")
 
 sys.exit
