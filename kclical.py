@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Parse King's Calender to iCal format
 Version 2019-02-25.22
@@ -50,7 +50,7 @@ PASSWD = password
 # STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
 STARTDATE = (datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0)).isoformat()
-ENDDATE = (datetime.utcnow() + timedelta(days=60)).isoformat()
+ENDDATE = (datetime.utcnow() + timedelta(days=240)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
 	            <username>{}</username>
