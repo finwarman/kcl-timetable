@@ -44,7 +44,7 @@ with open("knumber.fin", "r+") as unamefile:
 
 unamefile.close()
 
-password = keyring.get_password(SERVICE_ID, uname)  # retrieve password4
+password = keyring.get_password(SERVICE_ID, uname)  # retrieve password
 
 UNAME = uname
 PASSWD = password
@@ -67,7 +67,7 @@ APP_REQ_HEADERS = {
     'Content-Type':	    'application/xml',
     'Accept-Encoding':	'gzip',
     'Pragma':	        'no-cache',
-    'User-Agent':	    '''Kings%20Mobile/9003776 CFNetwork/976 Darwin/18.2.0''',
+    'User-Agent':	    '''King's%20Mobile/9081458 CFNetwork/978.0.7 Darwin/18.7.0''',
     'Content-Length':	'291',
     'Accept':       	'*/*',
     'Accept-Language':	'en-gb',
@@ -90,12 +90,12 @@ APP_REQ_HEADERS = {
 XML_RESPONSE = ""
 try:
     XML_RESPONSE = requests.post(
-        'https://campusm.kcl.ac.uk//kcl_live/services/CampusMUniversityService/retrieveCalendar',
+        'https://campusm.kcl.ac.uk//kclNewTimetable/services/CampusMUniversityService/retrieveCalendar',
         data=XML_BODY, headers=APP_REQ_HEADERS, verify=True).text
 except:
     try:
         XML_RESPONSE = requests.post(
-            'https://campusm.kcl.ac.uk//kcl_live/services/CampusMUniversityService/retrieveCalendar',
+            'https://campusm.kcl.ac.uk//kclNewTimetable/services/CampusMUniversityService/retrieveCalendar',
             data=XML_BODY, headers=APP_REQ_HEADERS, verify=False).text
         print("Was unable to verify SSL Cert. Disabled 'verify=True' flag for Request")
     except:
@@ -116,11 +116,11 @@ for item in CALITEMS:
 
     date_time_str = calentry['end']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['end'] = date_time_obj.strftime("%H:%M")
+    calentry['end'] = date_time_obj
 
     date_time_str = calentry['start']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['start'] = date_time_obj.strftime("%H:%M")
+    calentry['start'] = date_time_obj
 
     date_key = date_time_obj.strftime("%Y-%m-%d")
 
