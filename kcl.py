@@ -157,17 +157,22 @@ for item in CALITEMS:
 
     dates.setdefault(date_key, []).append(calentry)
 
-for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
-    print()
+for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag    
     dt = datetime.strptime(key, '%Y-%m-%d')
+
+    daystring = ""
     if dt.date() == datetime.today().date():
-        date_str = dt.strftime("%a %d %b %Y") + " (Today)"
+        daystring = " (Today) "
     elif dt.date() == (datetime.today().date() + timedelta(days=1)):
-        date_str = dt.strftime("%a %d %b %Y") + " (Tomorrow)"
+        daystring = " (Tomorrow) "
     elif dt.date() == (datetime.today().date() - timedelta(days=1)):
-        date_str = dt.strftime("%a %d %b %Y") + " (Yesterday)"
+        daystring = " (Yesterday) "
     else:
         date_str = dt.strftime("%a %d %b %Y")
+
+    date_str = dt.strftime("%a %d %b %Y") + daystring
+
+    print( crayons.white("=============================" + f"{daystring.center(14, '=')}" + "===============================\n") )
 
     print(
         crayons.green(date_str, bold=True)
@@ -196,17 +201,17 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
                     event.get('locAdd1', 'Location')
             ))
 
-# print("It is currently ", end="")
-# print(
-#     crayons.magenta("{}".format(
-#         datetime.utcnow().strftime("%H:%M")), bold=True), end=""
-# )
-# print(" on ", end="")
-# print(
-#     crayons.green("{}".format(
-#         datetime.utcnow().strftime("%a %d %b %Y")), bold=True), end=""
-# )
-# print('\n')
+print("It is currently ", end="")
+print(
+    crayons.magenta("{}".format(
+        datetime.utcnow().strftime("%H:%M")), bold=True), end=""
+)
+print(" on ", end="")
+print(
+    crayons.green("{}".format(
+        datetime.utcnow().strftime("%a %d %b %Y")), bold=True), end=""
+)
+print('\n')
 
 sys.exit
 
