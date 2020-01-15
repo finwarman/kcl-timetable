@@ -18,41 +18,49 @@ import re
 import keyring
 import requests
 import crayons
+import argparse
+
+parser = argparse.ArgumentParser(description='Fetch your KCL timetable on the command line.')
+parser.add_argument('-r', '--reset',
+                    action="store_true", dest="reset",
+                    help="Reset your login credentials", default=False)
+args = parser.parse_args()
 
 # keyring namespace for this app
 SERVICE_ID = 'kcl_timetable'
 KNUM_REG_PATTERN = re.compile("[k|K]\d{7}")
 
-file_path = "knumber.fin"
-if not os.path.isfile(file_path):
-    open("knumber.fin", "w").close()
+if (args.reset):
+    try:
+        keyring.delete_password(SERVICE_ID, "knumber")
+    except:
+        print("No K-Number stored")
 
-with open("knumber.fin", "r+") as unamefile:
-    uname = unamefile.read()
+    try:
+        keyring.delete_password(SERVICE_ID, "password")
+    except:
+        print("No password stored")
 
-    if(bool(KNUM_REG_PATTERN.match(uname)) == False):
-        print("No K-Number Saved.")
 
-        while bool(KNUM_REG_PATTERN.match(uname)) == False:
-            print("Please enter a valid K-Number:")
-            uname = input()
+knum = keyring.get_password(SERVICE_ID, "knumber")
 
-        unamefile.write(uname)
+if knum == None:
+    knum = ""
+    while not re.match(KNUM_REG_PATTERN, knum):
+        knum = input("Enter a valid K-Number: ")
+    pwd = getpass("Enter your password: ")
+    keyring.set_password(SERVICE_ID, "knumber", knum)
+    keyring.set_password(SERVICE_ID, "password", pwd)
 
-        pwd = getpass("Enter your password: ")
-        keyring.set_password(SERVICE_ID, uname, pwd)
+password = keyring.get_password(SERVICE_ID, "password")  # retrieve password
 
-unamefile.close()
-
-password = keyring.get_password(SERVICE_ID, uname)  # retrieve password
-
-UNAME = uname
+UNAME = knum
 PASSWD = password
 
 # STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
 STARTDATE = (datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0)).isoformat()
-ENDDATE = (datetime.utcnow() + timedelta(days=7)).isoformat()
+ENDDATE = (datetime.utcnow() + timedelta(days=14)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
 	            <username>{}</username>
@@ -113,14 +121,14 @@ for item in CALITEMS:
     for field in list(item):
         calentry[field.tag.replace(
             '{http://campusm.gw.com/campusm}', '')] = field.text
-
+    
     date_time_str = calentry['end']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['end'] = date_time_obj
+    calentry['end'] = date_time_obj.strftime('%H:%M')
 
     date_time_str = calentry['start']
     date_time_obj = datetime.fromisoformat(date_time_str)
-    calentry['start'] = date_time_obj
+    calentry['start'] = date_time_obj.strftime('%H:%M')
 
     date_key = date_time_obj.strftime("%Y-%m-%d")
 
@@ -134,8 +142,18 @@ for item in CALITEMS:
         calentry['type'] = 'Lecture'
     elif('/SmG/' in calentry['desc1']):
         calentry['type'] = 'Small Group Tut.'
+    elif('/DROP IN/' in calentry['desc1']):
+        calentry['type'] = 'Drop-In Session'
     else:
         calentry['type'] = 'Lesson'
+
+    if('/' in calentry['desc1']):
+        m = re.search(r" \w*\/", calentry['desc1'])
+        calentry['desc1'] = calentry['desc1'][:m.start()]
+
+    if(calentry['desc2'] == None):
+        calentry['desc2'] = calentry['desc1']
+    
 
     dates.setdefault(date_key, []).append(calentry)
 
@@ -157,38 +175,38 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
 
     events = dates[key]
     for event in sorted(events, key=lambda k: k['start']):
-        if dt.date() <= datetime.today().date() and event.get('start', '00:00') < datetime.utcnow().strftime("%H:%M"):
-            print('    {} - {}\t\t{}\n  ↳ {}   {}\n'.format(
+        if dt.date() <= datetime.today().date() and str(event.get('start', '00:00')) < datetime.utcnow().strftime("%H:%M"):
+            print('    {} - {}\t\t\t{}\n  ↳ {}   {}\n'.format(
                 crayons.blue(
                     event.get('start', 'No Start Time Given'), bold=True),
                 crayons.blue(
                     event.get('end', 'No End Time Given'), bold=True),
-                event.get('type', 'Lesson Type'),
+                crayons.white(event.get('type', 'Lesson Type'),bold=True),
                 '{:<25}'.format(event.get('desc2', 'Description')[:25]),
                 event.get('locAdd1', 'Location')
             ))
         else:
-            print('    {} - {}\t\t{}\n  ↳ {}   {}\n'.format(
+            print('    {} - {}\t\t\t\t{}\n  ↳ {}   {}\n'.format(
                 crayons.magenta(
                     event.get('start', 'No Start Time Given'), bold=True),
                 crayons.magenta(
                     event.get('end', 'No End Time Given'), bold=True),
-                event.get('type', 'Lesson Type'),
-                '{:<25}'.format(event.get('desc2', 'Description')[:25]),
-                event.get('locAdd1', 'Location')
+                crayons.white(event.get('type', 'Lesson Type'),bold=True),
+                    '{:<41}'.format(event.get('desc2', 'Description')[:41]), 
+                    event.get('locAdd1', 'Location')
             ))
 
-print("It is currently ", end="")
-print(
-    crayons.magenta("{}".format(
-        datetime.utcnow().strftime("%H:%M")), bold=True), end=""
-)
-print(" on ", end="")
-print(
-    crayons.green("{}".format(
-        datetime.utcnow().strftime("%a %d %b %Y")), bold=True), end=""
-)
-print('\n')
+# print("It is currently ", end="")
+# print(
+#     crayons.magenta("{}".format(
+#         datetime.utcnow().strftime("%H:%M")), bold=True), end=""
+# )
+# print(" on ", end="")
+# print(
+#     crayons.green("{}".format(
+#         datetime.utcnow().strftime("%a %d %b %Y")), bold=True), end=""
+# )
+# print('\n')
 
 sys.exit
 
