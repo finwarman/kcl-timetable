@@ -170,6 +170,9 @@ for item in CALITEMS:
 
 print("\nThis is your timetable for the next {} days:".format(days))
 
+if len(dates.keys()) < 1:
+    print("\n[No Events Found]\n")
+
 for key in sorted(dates.keys(), reverse=args.reverse):  # Top to bottom flag
     dt = datetime.strptime(key, '%Y-%m-%d')
 
