@@ -20,11 +20,24 @@ import requests
 import crayons
 import argparse
 
-parser = argparse.ArgumentParser(description='Fetch your KCL timetable on the command line.')
+parser = argparse.ArgumentParser(
+    description='Fetch your KCL timetable on the command line.')
 parser.add_argument('-r', '--reset',
                     action="store_true", dest="reset",
                     help="Reset your login credentials", default=False)
+parser.add_argument('--reverse',
+                    action="store_true", dest="reverse",
+                    help="Print timetable dates in reverse order", default=False)
+parser.add_argument('-d', '--days', nargs='?', default=14, const='const',
+                    help="The number of days to look ahead")
+
 args = parser.parse_args()
+
+days = 14
+if args.days.isnumeric():
+    days = int(args.days)
+else:
+    exit("'days' parameter must be int")
 
 # keyring namespace for this app
 SERVICE_ID = 'kcl_timetable'
@@ -57,10 +70,9 @@ password = keyring.get_password(SERVICE_ID, "password")  # retrieve password
 UNAME = knum
 PASSWD = password
 
-# STARTDATE = (datetime.utcnow() - timedelta(days=1)).isoformat()
 STARTDATE = (datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0)).isoformat()
-ENDDATE = (datetime.utcnow() + timedelta(days=14)).isoformat()
+ENDDATE = (datetime.utcnow() + timedelta(days=days)).isoformat()
 
 XML_BODY = '''<retrieveCalendar xmlns="http://campusm.gw.com/campusm">
 	            <username>{}</username>
@@ -121,7 +133,7 @@ for item in CALITEMS:
     for field in list(item):
         calentry[field.tag.replace(
             '{http://campusm.gw.com/campusm}', '')] = field.text
-    
+
     date_time_str = calentry['end']
     date_time_obj = datetime.fromisoformat(date_time_str)
     calentry['end'] = date_time_obj.strftime('%H:%M')
@@ -153,11 +165,12 @@ for item in CALITEMS:
 
     if(calentry['desc2'] == None):
         calentry['desc2'] = calentry['desc1']
-    
 
     dates.setdefault(date_key, []).append(calentry)
 
-for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag    
+print("\nThis is your timetable for the next {} days:".format(days))
+
+for key in sorted(dates.keys(), reverse=args.reverse):  # Top to bottom flag
     dt = datetime.strptime(key, '%Y-%m-%d')
 
     daystring = ""
@@ -172,7 +185,8 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
 
     date_str = dt.strftime("%a %d %b %Y") + daystring
 
-    print( crayons.white("=============================" + f"{daystring.center(14, '=')}" + "===============================\n") )
+    print(crayons.white("=============================" +
+                        f"{daystring.center(14, '=')}" + "===============================\n"))
 
     print(
         crayons.green(date_str, bold=True)
@@ -186,7 +200,7 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
                     event.get('start', 'No Start Time Given'), bold=True),
                 crayons.blue(
                     event.get('end', 'No End Time Given'), bold=True),
-                crayons.white(event.get('type', 'Lesson Type'),bold=True),
+                crayons.white(event.get('type', 'Lesson Type'), bold=True),
                 '{:<25}'.format(event.get('desc2', 'Description')[:25]),
                 event.get('locAdd1', 'Location')
             ))
@@ -196,9 +210,9 @@ for key in sorted(dates.keys(), reverse=True):  # Top to bottom flag
                     event.get('start', 'No Start Time Given'), bold=True),
                 crayons.magenta(
                     event.get('end', 'No End Time Given'), bold=True),
-                crayons.white(event.get('type', 'Lesson Type'),bold=True),
-                    '{:<41}'.format(event.get('desc2', 'Description')[:41]), 
-                    event.get('locAdd1', 'Location')
+                crayons.white(event.get('type', 'Lesson Type'), bold=True),
+                '{:<41}'.format(event.get('desc2', 'Description')[:41]),
+                event.get('locAdd1', 'Location')
             ))
 
 print("It is currently ", end="")
