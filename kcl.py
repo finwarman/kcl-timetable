@@ -28,7 +28,7 @@ parser.add_argument('-r', '--reset',
 parser.add_argument('--reverse',
                     action="store_true", dest="reverse",
                     help="Print timetable dates in reverse order", default=False)
-parser.add_argument('-d', '--days', nargs='?', default=14, const='const',
+parser.add_argument('-d', '--days', nargs='?', default='14', const='const',
                     help="The number of days to look ahead")
 
 args = parser.parse_args()
