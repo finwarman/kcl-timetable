@@ -37,7 +37,7 @@ else:
 
 # keyring namespace for this app
 SERVICE_ID = 'kcl_timetable'
-KNUM_REG_PATTERN = re.compile("[k|K]\d{7}")
+KNUM_REG_PATTERN = re.compile("^[k|K]\d{6,10}$")
 
 if (args.reset):
     try:

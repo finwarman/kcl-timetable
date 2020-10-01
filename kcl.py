@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Fetch Calendar from King's App
 
@@ -41,7 +41,7 @@ else:
 
 # keyring namespace for this app
 SERVICE_ID = 'kcl_timetable'
-KNUM_REG_PATTERN = re.compile("[k|K]\d{7}")
+KNUM_REG_PATTERN = re.compile("^[k|K]\d{6,10}$")
 
 if (args.reset):
     try:
@@ -198,13 +198,13 @@ for key in sorted(dates.keys(), reverse=args.reverse):  # Top to bottom flag
     events = dates[key]
     for event in sorted(events, key=lambda k: k['start']):
         if dt.date() <= datetime.today().date() and str(event.get('start', '00:00')) < datetime.utcnow().strftime("%H:%M"):
-            print('    {} - {}\t\t\t{}\n  ↳ {}   {}\n'.format(
+            print('    {} - {}\t\t\t\t{}\n  ↳ {}   {}\n'.format(
                 crayons.blue(
                     event.get('start', 'No Start Time Given'), bold=True),
                 crayons.blue(
                     event.get('end', 'No End Time Given'), bold=True),
                 crayons.white(event.get('type', 'Lesson Type'), bold=True),
-                '{:<25}'.format(event.get('desc2', 'Description')[:25]),
+                '{:<41}'.format(event.get('desc2', 'Description')[:41]),
                 event.get('locAdd1', 'Location')
             ))
         else:
